@@ -25,27 +25,29 @@ pipeline {
             }
         }
 
-       stage('deploy-dev') {
-    steps {
-        sshagent(['ubuntu']) {
+        stage('deploy-dev') {
+            steps {
+                sshagent(['ubuntu']) {
 
-            sh '''
-            echo "Checking WAR file..."
-            ls -l target/
+                    sh '''
+                    echo "Checking WAR file..."
+                    ls -l target/
 
-            echo "Testing SSH connection..."
-            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
+                    echo "Testing SSH connection..."
+                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
 
-            echo "Checking Tomcat webapps folder..."
-            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /home/ubuntu/apache-tomcat-9.0.64/webapps'
+                    echo "Checking Tomcat webapps folder..."
+                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /home/ubuntu/apache-tomcat-9.0.64/webapps'
 
-            echo "Deploying WAR..."
-            scp -o StrictHostKeyChecking=no \
-            target/myweb.war \
-            ubuntu@172.31.43.127:/home/ubuntu/apache-tomcat-9.0.64/webapps/
+                    echo "Deploying WAR..."
+                    scp -o StrictHostKeyChecking=no \
+                    target/myweb.war \
+                    ubuntu@172.31.43.127:/home/ubuntu/apache-tomcat-9.0.64/webapps/
 
-            echo "Deployment completed"
-            '''
+                    echo "Deployment completed"
+                    '''
+                }
+            }
         }
     }
 }
