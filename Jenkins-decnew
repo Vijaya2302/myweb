@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        durabilityHint('MAX_SURVIVABILITY')
+    }
+
     environment {
         PATH = "/opt/maven3/bin:$PATH"
     }
