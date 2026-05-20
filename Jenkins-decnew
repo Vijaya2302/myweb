@@ -1,43 +1,49 @@
-pipeline{
+pipeline {
     agent any
-    
-    environment{
+
+    environment {
         PATH = "/opt/maven3/bin:$PATH"
     }
-    stages{
-        stage("Git Checkout"){
-            steps{
-               git credentialsId: 'javahome2', url: 'https://github.com/Vijaya2302/myweb.git'
+
+    stages {
+
+        stage("Git Checkout") {
+            steps {
+                git credentialsId: 'javahome2',
+                    url: 'https://github.com/Vijaya2302/myweb.git'
             }
         }
-        stage("Maven Build"){
-            steps{
+
+        stage("Maven Build") {
+            steps {
                 sh "mvn clean package"
                 sh "mv target/*.war target/myweb.war"
             }
         }
-       stage('deploy-dev') {
-    steps {
-        sshagent(['ubuntu']) {
-            sh '''
-            echo "Checking WAR file..."
-            ls -l target/
 
-            echo "Testing SSH connection..."
-            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
+        stage('deploy-dev') {
+            steps {
+                sshagent(['ubuntu']) {
 
-            echo "Checking Tomcat webapps folder..."
-            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /opt/tomcat/webapps'
+                    sh '''
+                    echo "Checking WAR file..."
+                    ls -l target/
 
-            echo "Deploying WAR..."
-            scp -o StrictHostKeyChecking=no \
-            target/myweb.war \
-            ubuntu@172.31.43.127:/opt/tomcat/webapps/
+                    echo "Testing SSH connection..."
+                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
 
-            echo "Deployment completed"
-            '''
+                    echo "Checking Tomcat webapps folder..."
+                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /opt/tomcat/webapps'
+
+                    echo "Deploying WAR..."
+                    scp -o StrictHostKeyChecking=no \
+                    target/myweb.war \
+                    ubuntu@172.31.43.127:/opt/tomcat/webapps/
+
+                    echo "Deployment completed"
+                    '''
+                }
+            }
         }
-    }
-        
     }
 }
