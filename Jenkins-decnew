@@ -16,17 +16,28 @@ pipeline{
                 sh "mv target/*.war target/myweb.war"
             }
         }
-        stage('deploy-dev') {
+       stage('deploy-dev') {
     steps {
         sshagent(['ubuntu']) {
             sh '''
+            echo "Checking WAR file..."
+            ls -l target/
+
+            echo "Testing SSH connection..."
+            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
+
+            echo "Checking Tomcat webapps folder..."
+            ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /opt/tomcat/webapps'
+
+            echo "Deploying WAR..."
             scp -o StrictHostKeyChecking=no \
             target/myweb.war \
             ubuntu@172.31.43.127:/opt/tomcat/webapps/
+
+            echo "Deployment completed"
             '''
         }
     }
-}
         
     }
 }
