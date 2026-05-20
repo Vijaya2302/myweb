@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     options {
-        durabilityHint('MAX_SURVIVABILITY')
+        skipDefaultCheckout(true)
+        durabilityHint('PERFORMANCE_OPTIMIZED')
     }
 
     environment {
@@ -11,40 +12,27 @@ pipeline {
 
     stages {
 
-        stage("Git Checkout") {
+        stage('Git Checkout') {
             steps {
                 git credentialsId: 'javahome2',
                     url: 'https://github.com/Vijaya2302/myweb.git'
             }
         }
 
-        stage("Maven Build") {
+        stage('Maven Build') {
             steps {
-                sh "mvn clean package"
-                sh "mv target/*.war target/myweb.war"
+                sh 'mvn clean package -DskipTests'
+                sh 'mv target/*.war target/myweb.war'
             }
         }
 
-        stage('deploy-dev') {
+        stage('Deploy') {
             steps {
                 sshagent(['ubuntu']) {
-
                     sh '''
-                    echo "Checking WAR file..."
-                    ls -l target/
-
-                    echo "Testing SSH connection..."
-                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'pwd && whoami'
-
-                    echo "Checking Tomcat webapps folder..."
-                    ssh -o StrictHostKeyChecking=no ubuntu@172.31.43.127 'ls -ld /home/ubuntu/apache-tomcat-9.0.64/webapps'
-
-                    echo "Deploying WAR..."
                     scp -o StrictHostKeyChecking=no \
                     target/myweb.war \
                     ubuntu@172.31.43.127:/home/ubuntu/apache-tomcat-9.0.64/webapps/
-
-                    echo "Deployment completed"
                     '''
                 }
             }
